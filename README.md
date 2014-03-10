@@ -15,6 +15,8 @@ As of now, SionCore doesn't have a proper system to manage dependencies. Every u
 3. Add `sioncore`to your Libgdx core project build path
 4. Link the platform specific Libgdx jar files from the corresponding projects
 
+Most modules are either fairly well documented or self-explanatory.
+
 SionCore uses and exposes:
 
 * Libgdx
