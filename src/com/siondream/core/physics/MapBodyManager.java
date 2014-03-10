@@ -207,31 +207,31 @@ public class MapBodyManager {
 	private Shape getRectangle(RectangleMapObject rectangleObject) {
 		Rectangle rectangle = rectangleObject.getRectangle();
 		PolygonShape polygon = new PolygonShape();
-		Vector2 size = new Vector2((rectangle.x + rectangle.width * 0.5f) * units,
-								   (rectangle.y + rectangle.height * 0.5f ) * units);
-		polygon.setAsBox(rectangle.width * 0.5f * units,
-						 rectangle.height * 0.5f * units,
-						 size,
-						 0.0f);
-		
+		Vector2 size = new Vector2((rectangle.x + rectangle.width * 0.5f) / units,
+		                           (rectangle.y + rectangle.height * 0.5f ) / units);
+		polygon.setAsBox(rectangle.width * 0.5f / units,
+		                 rectangle.height * 0.5f / units,
+		                 size,
+		                 0.0f);
 		return polygon;
 	}
 	
 	private Shape getCircle(CircleMapObject circleObject) {
 		Circle circle = circleObject.getCircle();
 		CircleShape circleShape = new CircleShape();
-		circleShape.setRadius(circle.radius * units);
-		circleShape.setPosition(new Vector2(circle.x * units, circle.y * units));
+		circleShape.setRadius(circle.radius / units);
+		circleShape.setPosition(new Vector2(circle.x / units, circle.y / units));
 		return circleShape;
 	}
 	
 	private Shape getPolygon(PolygonMapObject polygonObject) {
 		PolygonShape polygon = new PolygonShape();
-		float[] vertices = polygonObject.getPolygon().getVertices();
+		float[] vertices = polygonObject.getPolygon().getTransformedVertices();
+		
 		float[] worldVertices = new float[vertices.length];
 		
-		for (int i = 0; i < vertices.length; ++i) { 
-			worldVertices[i] = vertices[i] * units;
+		for (int i = 0; i < vertices.length; ++i) {
+		    worldVertices[i] = vertices[i] / units;
 		}
 		
 		polygon.set(worldVertices);
@@ -239,16 +239,13 @@ public class MapBodyManager {
 	}
 	
 	private Shape getPolyline(PolylineMapObject polylineObject) {
-		Polyline polyline = polylineObject.getPolyline();
-		float[] vertices = polyline.getVertices();
+		float[] vertices = polylineObject.getPolyline().getTransformedVertices();
 		Vector2[] worldVertices = new Vector2[vertices.length / 2];
-		float originX = polyline.getX();
-		float originY = polyline.getY();
 		
 		for (int i = 0; i < vertices.length / 2; ++i) {
-			worldVertices[i] = new Vector2();
-			worldVertices[i].x = (vertices[i * 2] + originX) * units;
-			worldVertices[i].y = (vertices[i * 2 + 1] + originY) * units;
+		    worldVertices[i] = new Vector2();
+		    worldVertices[i].x = vertices[i * 2] / units;
+		    worldVertices[i].y = vertices[i * 2 + 1] / units;
 		}
 		
 		ChainShape chain = new ChainShape(); 
