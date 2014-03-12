@@ -12,11 +12,21 @@ import ashley.systems.IteratingSystem;
 
 public class PhysicsSystem extends IteratingSystem {
 
+	float alpha;
+	
 	public PhysicsSystem() {
 		super(Family.getFamilyFor(PhysicsComponent.class,
 								  TransformComponent.class));
+		
+		alpha = 1.0f;
 	}
 
+	@Override
+	public void update(float deltaTime) {
+		super.update(deltaTime);
+		alpha = 1.0f;
+	}
+	
 	@Override
 	public void processEntity(Entity entity, float deltaTime) {
 		PhysicsComponent physics = entity.getComponent(PhysicsComponent.class);
@@ -32,9 +42,14 @@ public class PhysicsSystem extends IteratingSystem {
 		}
 		else {
 			Vector2 bodyPosition = bodyTransform.getPosition();
-			transform.position.x = bodyPosition.x;
-			transform.position.y = bodyPosition.y;
-			transform.angle = bodyTransform.getRotation();
+			transform.position.x = bodyPosition.x * alpha + transform.position.x * (1.0f - alpha);
+			transform.position.y = bodyPosition.y * alpha + transform.position.y * (1.0f - alpha);
+			transform.angle = bodyTransform.getRotation() * alpha + transform.angle * (1.0f - alpha);
 		}
+	}
+
+	public void interpolateCurrentPosition(float deltaTime, float alpha) {
+		this.alpha = alpha;
+		super.update(deltaTime);
 	}
 }

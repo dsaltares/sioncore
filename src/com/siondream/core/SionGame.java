@@ -37,6 +37,7 @@ import com.siondream.core.entity.factory.ComponentReaders.StateComponentReader;
 import com.siondream.core.entity.factory.ComponentReaders.TextureComponentReader;
 import com.siondream.core.entity.factory.ComponentReaders.TransformComponentReader;
 import com.siondream.core.entity.factory.EntityFactory;
+import com.siondream.core.entity.systems.PhysicsSystem;
 import com.siondream.core.physics.CategoryBitsManager;
 import com.siondream.core.physics.CollisionHandler;
 import com.siondream.core.tweeners.ActorTweener;
@@ -183,6 +184,12 @@ public class SionGame extends Game implements InputProcessor {
 		while (accumulator >= Env.physicsDeltaTime) {
 			world.step(Env.physicsDeltaTime, Env.velocityIterations, Env.positionIterations);
 			accumulator -= Env.physicsDeltaTime;
+		}
+		
+		PhysicsSystem physics = engine.getSystem(PhysicsSystem.class);
+		
+		if (physics != null) {
+			physics.interpolateCurrentPosition(Env.physicsDeltaTime, (float)(accumulator / Env.physicsDeltaTime));
 		}
 		
 		Color background = Env.backgroundColor;
