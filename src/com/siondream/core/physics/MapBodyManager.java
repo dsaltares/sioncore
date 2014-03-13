@@ -3,6 +3,7 @@ package com.siondream.core.physics;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -14,7 +15,6 @@ import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.objects.TextureMapObject;
 import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -26,25 +26,26 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.badlogic.gdx.utils.XmlReader;
-import com.badlogic.gdx.utils.XmlReader.Element;
+import com.badlogic.gdx.utils.JsonValue.JsonIterator;
 
 /**
  * @author David Saltares Márquez david.saltares at gmail.com
  * @brief Populates box2D world with static bodies using data from a map object
  * 
- * It uses an XML formatted materials file to assign properties to the static
+ * It uses a JSON formatted materials file to assign properties to the static
  * bodies it creates. To assign a material to a shape add a "material" custom
  * property to the shape in question using your editor of choice (Tiled, Gleed,
  * Tide...). Such file uses the following structure:
 
 @code
-<materials>
-	<material name="ice" density="1.0" restitution="0.0" friction="0.1" />
-	<material name="elastic" density="1.0" restitution="0.8" friction="0.8" />
-</materials>
+[
+	{ "name" : "ice", "density" : 1.0, "restitution" : 0.0, "friction" : 0.1 },
+	{ "name" : "elastic", "density" : 1.0, "restitution" : 0.8, "friction" : 0.8 }
+]
 @endcode
 
  * In case no material property is found, it'll get a default one. 
@@ -60,10 +61,10 @@ public class MapBodyManager {
 	/**
 	 * @param world box2D world to work with.
 	 * @param unitsPerPixel conversion ratio from pixel units to box2D metres.
-	 * @param materialsFile xml file with specific physics properties to be assigned to newly created bodies.
+	 * @param materialsFile json file with specific physics properties to be assigned to newly created bodies.
 	 * @param loggingLevel verbosity of the embedded logger.
 	 */
-	public MapBodyManager(World world, float unitsPerPixel, String materialsFile, int loggingLevel) {
+	public MapBodyManager(World world, float unitsPerPixel, FileHandle materialsFile, int loggingLevel) {
 		logger = new Logger("MapBodyManager", loggingLevel);
 		logger.info("initialising");
 		
@@ -166,7 +167,7 @@ public class MapBodyManager {
 		bodies.clear();
 	}
 	
-	private void loadMaterialsFile(String materialsFile) {
+	private void loadMaterialsFile(FileHandle materialsFile) {
 		logger.info("adding default material");
 		
 		FixtureDef fixtureDef = new FixtureDef();
@@ -178,29 +179,30 @@ public class MapBodyManager {
 		logger.info("loading materials file");
 		
 		try {
-			XmlReader reader = new XmlReader();
-			Element root = reader.parse(Gdx.files.internal(materialsFile));
+			JsonReader reader = new JsonReader();
+			JsonValue root = reader.parse(materialsFile);
+			JsonIterator materialIt = root.iterator();
 			
-			Array<Element> materialElements = root.getChildrenByName("materials");
-			
-			for (Element material : materialElements) {
-				String name = material.getAttribute("name");
+			while (materialIt.hasNext()) {
+				JsonValue materialValue = materialIt.next();
 				
-				if (name == null) {
+				if (!materialValue.has("name")) {
 					logger.error("material without name");
 					continue;
 				}
 				
+				String name = materialValue.getString("name");
+				
 				fixtureDef = new FixtureDef();
-				fixtureDef.density = Float.parseFloat(material.getAttribute("density", "1.0"));
-				fixtureDef.friction = Float.parseFloat(material.getAttribute("friction", "1.0"));
-				fixtureDef.restitution = Float.parseFloat(material.getAttribute("restitution", "1.0"));
+				fixtureDef.density = materialValue.getFloat("density", 1.0f);
+				fixtureDef.friction = materialValue.getFloat("friction", 1.0f);
+				fixtureDef.restitution = materialValue.getFloat("restitution", 0.0f);
 				logger.info("adding material " + name);
 				materials.put(name, fixtureDef);
 			}
 			
 		} catch (Exception e) {
-			logger.error("error loading " + materialsFile + " " + e.getMessage());
+			logger.error("error loading " + materialsFile.name() + " " + e.getMessage());
 		}
 	}
 	
