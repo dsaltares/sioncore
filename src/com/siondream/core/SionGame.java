@@ -15,7 +15,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Transform;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -181,12 +183,16 @@ public class SionGame extends Game implements InputProcessor {
 		
 		accumulator += frameTime;
 		
+		PhysicsSystem physics = engine.getSystem(PhysicsSystem.class);
+		
 		while (accumulator >= Env.physicsDeltaTime) {
 			world.step(Env.physicsDeltaTime, Env.velocityIterations, Env.positionIterations);
 			accumulator -= Env.physicsDeltaTime;
+			
+			if (physics != null) {
+				physics.update(deltaTime);
+			}
 		}
-		
-		PhysicsSystem physics = engine.getSystem(PhysicsSystem.class);
 		
 		if (physics != null) {
 			physics.interpolate(Env.physicsDeltaTime, (float)(accumulator / Env.physicsDeltaTime));
