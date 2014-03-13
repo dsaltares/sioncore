@@ -189,7 +189,7 @@ public class SionGame extends Game implements InputProcessor {
 		PhysicsSystem physics = engine.getSystem(PhysicsSystem.class);
 		
 		if (physics != null) {
-			physics.interpolateCurrentPosition(Env.physicsDeltaTime, (float)(accumulator / Env.physicsDeltaTime));
+			physics.interpolate(Env.physicsDeltaTime, (float)(accumulator / Env.physicsDeltaTime));
 		}
 		
 		Color background = Env.backgroundColor;

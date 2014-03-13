@@ -24,7 +24,6 @@ public class PhysicsSystem extends IteratingSystem {
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
-		alpha = 1.0f;
 	}
 	
 	@Override
@@ -48,8 +47,9 @@ public class PhysicsSystem extends IteratingSystem {
 		}
 	}
 
-	public void interpolateCurrentPosition(float deltaTime, float alpha) {
+	public void interpolate(float deltaTime, float alpha) {
 		this.alpha = alpha;
 		super.update(deltaTime);
+		alpha = 1.0f;
 	}
 }
