@@ -106,6 +106,8 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		
 		renderParticles();
 		
+		Env.game.getStage().draw();
+		
 		debugDraw();
 	}
 	
