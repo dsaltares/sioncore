@@ -9,20 +9,20 @@ public class VirtualCamera extends OrthographicCamera {
 
 	private Vector3 tmp = new Vector3();
 	private Vector2 origin = new Vector2();
-	private VirtualViewport virtualViewport;
+	private VirtualViewport viewport;
 	
 	public VirtualCamera(VirtualViewport virtualViewport) {
 		this(virtualViewport, 0f, 0f);
 	}
 
 	public VirtualCamera(VirtualViewport virtualViewport, float cx, float cy) {
-		this.virtualViewport = virtualViewport;
+		this.viewport = virtualViewport;
 		this.origin.set(cx, cy);
 		updateViewport();
 	}
 	
 	public void setVirtualViewport(VirtualViewport virtualViewport) {
-		this.virtualViewport = virtualViewport;
+		this.viewport = virtualViewport;
 		updateViewport();
 	}
 
@@ -32,10 +32,10 @@ public class VirtualCamera extends OrthographicCamera {
 
 	@Override
 	public void update() {
-		float left = zoom * -viewportWidth / 2 + virtualViewport.getVirtualWidth() * origin.x;
-		float right = zoom * viewportWidth / 2 + virtualViewport.getVirtualWidth() * origin.x;
-		float top = zoom * viewportHeight / 2 + virtualViewport.getVirtualHeight() * origin.y;
-		float bottom = zoom * -viewportHeight / 2 + virtualViewport.getVirtualHeight() * origin.y;
+		float left = zoom * -viewportWidth * 0.5f + viewport.virtualWidth * origin.x;
+		float right = zoom * viewportWidth * 0.5f + viewport.virtualWidth * origin.x;
+		float top = zoom * viewportHeight * 0.5f + viewport.virtualHeight * origin.y;
+		float bottom = zoom * -viewportHeight * 0.5f + viewport.virtualHeight * origin.y;
 
 		projection.setToOrtho(left, right, bottom, top, Math.abs(near), Math.abs(far));
 		view.setToLookAt(position, tmp.set(position).add(direction), up);
@@ -47,6 +47,6 @@ public class VirtualCamera extends OrthographicCamera {
 	}
 
 	private void updateViewport() {
-		setToOrtho(false, virtualViewport.getWidth(), virtualViewport.getHeight());
+		setToOrtho(false, viewport.width, viewport.height);
 	}
 }

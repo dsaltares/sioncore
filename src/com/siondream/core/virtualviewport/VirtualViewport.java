@@ -4,43 +4,27 @@ import com.badlogic.gdx.Gdx;
 
 public class VirtualViewport {
 
-	float virtualWidth;
-	float virtualHeight;
-
-	public float getVirtualWidth() {
-		return virtualWidth;
-	}
-
-	public float getVirtualHeight() {
-		return virtualHeight;
-	}
+	public final float width;
+	public final float height;
+	public final float x;
+	public final float y;
+	
+	public float virtualWidth;
+	public float virtualHeight;
 
 	public VirtualViewport(float virtualWidth, float virtualHeight) {
-		this(virtualWidth, virtualHeight, false);
-	}
-
-	public VirtualViewport(float virtualWidth, float virtualHeight, boolean shrink) {
+		float screenWidth = Gdx.graphics.getWidth();
+		float screenHeight = Gdx.graphics.getHeight();
+		
 		this.virtualWidth = virtualWidth;
 		this.virtualHeight = virtualHeight;
+		this.width = getWidth(screenWidth, screenHeight);
+		this.height = getHeight(screenWidth, screenHeight);
+		this.x = (screenWidth - width) * 0.5f;
+		this.y = (screenHeight - height) * 0.5f;
 	}
 
-	public float getWidth() {
-		return getWidth(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-	}
-
-	public float getHeight() {
-		return getHeight(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-	}
-
-	/**
-	 * Returns the view port width to let all the virtual view port to be shown on the screen.
-	 * 
-	 * @param screenWidth
-	 *            The screen width.
-	 * @param screenHeight
-	 *            The screen Height.
-	 */
-	public float getWidth(float screenWidth, float screenHeight) {
+	private float getWidth(float screenWidth, float screenHeight) {
 		float virtualAspect = virtualWidth / virtualHeight;
 		float aspect = screenWidth / screenHeight;
 		if (aspect > virtualAspect || (Math.abs(aspect - virtualAspect) < 0.01f)) {
@@ -50,15 +34,7 @@ public class VirtualViewport {
 		}
 	}
 
-	/**
-	 * Returns the view port height to let all the virtual view port to be shown on the screen.
-	 * 
-	 * @param screenWidth
-	 *            The screen width.
-	 * @param screenHeight
-	 *            The screen Height.
-	 */
-	public float getHeight(float screenWidth, float screenHeight) {
+	private float getHeight(float screenWidth, float screenHeight) {
 		float virtualAspect = virtualWidth / virtualHeight;
 		float aspect = screenWidth / screenHeight;
 		if (aspect > virtualAspect || (Math.abs(aspect - virtualAspect) < 0.01f)) {
@@ -67,5 +43,4 @@ public class VirtualViewport {
 			return virtualWidth / aspect;
 		}
 	}
-
 }

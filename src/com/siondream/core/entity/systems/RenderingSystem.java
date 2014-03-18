@@ -297,7 +297,7 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 				batch.setProjectionMatrix(uiCamera.combined);
 				batch.begin();
 				debugFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-				debugFont.draw(batch, fpsText, uiViewport.getWidth() - bounds.width - 20.0f, 20.0f);
+				debugFont.draw(batch, fpsText, uiViewport.width - bounds.width - 20.0f, 20.0f);
 				batch.end();
 			}
 			

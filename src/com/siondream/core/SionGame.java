@@ -222,7 +222,7 @@ public class SionGame extends Game implements InputProcessor {
 		
 		uiViewport = uiViewportBuilder.getVirtualViewport(width, height);
 		uiCamera.setVirtualViewport(uiViewport);
-		uiCamera.setPosition(uiViewport.getWidth() * 0.5f, uiViewport.getHeight() * 0.5f);
+		uiCamera.setPosition(uiViewport.width * 0.5f, uiViewport.height * 0.5f);
 		stage.setCamera(uiCamera);
 		
 		
