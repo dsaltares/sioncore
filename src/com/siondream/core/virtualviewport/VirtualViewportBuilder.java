@@ -1,6 +1,7 @@
 package com.siondream.core.virtualviewport;
 
 public class VirtualViewportBuilder {
+
 	public final float minWidth;
 	public final float minHeight;
 	public final float maxWidth;
@@ -14,7 +15,7 @@ public class VirtualViewportBuilder {
 	}
 
 	public VirtualViewport getVirtualViewport(float width, float height) {
-		if (insideBounds(width, height))
+		if (width >= minWidth && width <= maxWidth && height >= minHeight && height <= maxHeight)
 			return new VirtualViewport(width, height);
 
 		float aspect = width / height;

@@ -107,7 +107,8 @@ public class SionGame extends Game implements InputProcessor {
 		
 		uiViewportBuilder = new VirtualViewportBuilder(800, 600, 1280, 720);
 		uiViewport = uiViewportBuilder.getVirtualViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		uiCamera = new VirtualCamera(viewport);
+		uiCamera = new VirtualCamera(uiViewport);
+		uiCamera.setPosition(0.0f, 0.0f);
 		
 		oldCameraPos = new Vector3(camera.position);
 		
@@ -217,12 +218,13 @@ public class SionGame extends Game implements InputProcessor {
 		oldCameraPos.set(camera.position);
 		viewport = viewportBuilder.getVirtualViewport(width * Env.pixelsToMetres, height * Env.pixelsToMetres);
 		camera.setVirtualViewport(viewport);
-		camera.setPosition(oldCameraPos.x, oldCameraPos.y);
+		camera.position.set(oldCameraPos.x, oldCameraPos.y, 0.0f);
 		
 		uiViewport = uiViewportBuilder.getVirtualViewport(width, height);
 		uiCamera.setVirtualViewport(uiViewport);
-		uiCamera.setPosition(uiCamera.viewportWidth * 0.5f, uiCamera.viewportHeight * 0.5f);
-		uiCamera.update();
+		uiCamera.setPosition(uiViewport.getWidth() * 0.5f, uiViewport.getHeight() * 0.5f);
+		stage.setCamera(uiCamera);
+		
 		
 		if (currentScreen != null) {
 			currentScreen.resize(width, height);

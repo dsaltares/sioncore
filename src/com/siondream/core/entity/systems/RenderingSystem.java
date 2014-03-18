@@ -31,6 +31,8 @@ import com.siondream.core.entity.components.ParticleComponent;
 import com.siondream.core.entity.components.SpineComponent;
 import com.siondream.core.entity.components.TextureComponent;
 import com.siondream.core.entity.components.TransformComponent;
+import com.siondream.core.virtualviewport.VirtualCamera;
+import com.siondream.core.virtualviewport.VirtualViewport;
 import com.siondream.core.virtualviewport.VirtualViewportBuilder;
 
 import ashley.core.Engine;
@@ -44,6 +46,8 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 
 	protected SpriteBatch batch;
 	protected OrthographicCamera camera;
+	protected OrthographicCamera uiCamera;
+	protected VirtualViewport uiViewport;
 	protected ShapeRenderer shapeRenderer;
 	protected IntMap<Entity> mapEntities;
 	
@@ -67,6 +71,8 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		this.sortedEntities = new Array<Entity>(100);
 		this.batch = new SpriteBatch();
 		this.camera = Env.game.getCamera();
+		this.uiCamera = Env.game.getUICamera();
+		this.uiViewport = Env.game.getUIViewport();
 		this.sorter = new DepthSorter();
 		this.shapeRenderer = new ShapeRenderer();
 		this.box2DRenderer = new Box2DDebugRenderer(Env.drawBodies,
@@ -209,7 +215,6 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 	
 	protected void renderUI() {
 		Stage stage = Env.game.getStage();
-		OrthographicCamera uiCamera = Env.game.getUICamera();
 		stage.setCamera(uiCamera);
 		stage.draw();
 	}
@@ -289,10 +294,10 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 			if (Env.drawFPS) {
 				String fpsText = String.format("%d FPS", Gdx.graphics.getFramesPerSecond());
 				TextBounds bounds = debugFont.getBounds(fpsText);
-				batch.setProjectionMatrix(Env.game.getUICamera().combined);
+				batch.setProjectionMatrix(uiCamera.combined);
 				batch.begin();
 				debugFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-				debugFont.draw(batch, fpsText, Env.virtualWidth - bounds.width - 20.0f, 20.0f);
+				debugFont.draw(batch, fpsText, uiViewport.getWidth() - bounds.width - 20.0f, 20.0f);
 				batch.end();
 			}
 			
