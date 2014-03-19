@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.AssetLoader;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -46,6 +47,10 @@ public class Assets implements Disposable, AssetErrorListener {
 		manager.setLoader(AnimationStateData.class, new AnimationStateDataLoader(new InternalFileHandleResolver()));
 		
 		loadGroups(assetFile);
+	}
+	
+	public AssetLoader<?, ?> getLoader(Class<?> type) {
+		return manager.getLoader(type);
 	}
 		
 	public void loadGroup(String groupName) {
