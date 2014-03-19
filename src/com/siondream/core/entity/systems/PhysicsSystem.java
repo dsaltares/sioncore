@@ -38,6 +38,10 @@ public class PhysicsSystem extends IteratingSystem {
 			Vector2 bodyPosition = bodyTransform.getPosition();
 			bodyPosition.set(transform.position.x, transform.position.y);
 			physics.body.setTransform(bodyPosition, transform.angle);
+			
+			if (override.autoDisable) {
+				override.enable = false;
+			}
 		}
 		else {
 			Vector2 bodyPosition = bodyTransform.getPosition();

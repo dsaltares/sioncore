@@ -6,6 +6,7 @@ import ashley.utils.Pool.Poolable;
 public class OverridePhysicsComponent extends Component implements Poolable {
 
 	public boolean enable;
+	public boolean autoDisable;
 	
 	public OverridePhysicsComponent() {
 		reset();
@@ -13,11 +14,13 @@ public class OverridePhysicsComponent extends Component implements Poolable {
 	
 	public OverridePhysicsComponent(OverridePhysicsComponent other) {
 		enable = other.enable;
+		autoDisable = other.autoDisable;
 	}
 	
 	@Override
 	public void reset() {
 		enable = true;
+		autoDisable = true;
 	}
 
 }
