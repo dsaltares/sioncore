@@ -193,8 +193,7 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 				mapRenderer = null;
 			}
 		}
-		
-		if (mapEntities.size > 0) {
+		else {
 			Entity mapEntity = mapEntities.values().next();
 			MapComponent mapComponent = mapEntity.getComponent(MapComponent.class);
 			
