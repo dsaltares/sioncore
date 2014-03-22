@@ -37,6 +37,7 @@ public class StateMachine {
 		}
 		
 		if (nextState != null && nextState != currentState) {
+			logger.info("switching to state " + nextState.getClass().getSimpleName());
 			currentState.exit();
 			currentState = nextState;
 			nextState = null;
