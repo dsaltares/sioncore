@@ -23,6 +23,7 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
@@ -132,27 +133,27 @@ public class SpriteAnimationLoader extends AsynchronousAssetLoader<SpriteAnimati
         return fileName.substring(0, pos);
     }
 	
-	private int getPlayMode(String mode) {
+	private PlayMode getPlayMode(String mode) {
 		if (mode.equals("normal")) {
-			return Animation.NORMAL; 
+			return PlayMode.NORMAL; 
 		}
 		else if (mode.equals("loop")) {
-			return Animation.LOOP;
+			return PlayMode.LOOP;
 		}
 		else if (mode.equals("loop_pingpong")) {
-			return Animation.LOOP_PINGPONG;
+			return PlayMode.LOOP_PINGPONG;
 		}
 		else if (mode.equals("loop_random")) {
-			return Animation.LOOP_RANDOM;
+			return PlayMode.LOOP_RANDOM;
 		}
 		else if (mode.equals("loop_reversed")) {
-			return Animation.LOOP_REVERSED;
+			return PlayMode.LOOP_REVERSED;
 		}
 		else if (mode.equals("reversed")) {
-			return Animation.REVERSED;
+			return PlayMode.REVERSED;
 		}
 		else {
-			return Animation.NORMAL;
+			return PlayMode.NORMAL;
 		}
 	}
 	

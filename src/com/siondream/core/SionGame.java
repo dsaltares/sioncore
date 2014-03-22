@@ -12,18 +12,15 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Transform;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.core.assets.Assets;
 import com.siondream.core.entity.components.TransformComponent;
 import com.siondream.core.entity.factory.ComponentReaders.ColorComponentReader;
@@ -45,10 +42,6 @@ import com.siondream.core.physics.CollisionHandler;
 import com.siondream.core.tweeners.ActorTweener;
 import com.siondream.core.tweeners.CameraTweener;
 import com.siondream.core.tweeners.TransformTweener;
-import com.siondream.core.tweeners.VirtualCameraTweener;
-import com.siondream.core.virtualviewport.VirtualCamera;
-import com.siondream.core.virtualviewport.VirtualViewport;
-import com.siondream.core.virtualviewport.VirtualViewportBuilder;
 
 public class SionGame extends Game implements InputProcessor {
 
@@ -59,13 +52,10 @@ public class SionGame extends Game implements InputProcessor {
 	private SionScreen nextScreen;
 	private SionScreen currentScreen;
 	private InputMultiplexer multiplexer;
-	private VirtualViewportBuilder viewportBuilder;
-	private VirtualViewportBuilder uiViewportBuilder;
-	private VirtualViewport viewport;
-	private VirtualViewport uiViewport;
-	private VirtualCamera camera;
-	private VirtualCamera uiCamera;
-	private Vector3 oldCameraPos;
+	private ExtendViewport viewport;
+	private OrthographicCamera camera;
+	private ExtendViewport uiViewport;
+	private OrthographicCamera uiCamera;
 	
 	private Assets assets;
 	
@@ -100,21 +90,14 @@ public class SionGame extends Game implements InputProcessor {
 		nextScreen = null;
 		currentScreen = null;
 		
-		viewportBuilder = new VirtualViewportBuilder(800 * Env.pixelsToMetres, 600 * Env.pixelsToMetres, 1280 * Env.pixelsToMetres, 720 * Env.pixelsToMetres);
-		viewport = viewportBuilder.getVirtualViewport(Gdx.graphics.getWidth() * Env.pixelsToMetres, Gdx.graphics.getHeight() * Env.pixelsToMetres);
-		camera = new VirtualCamera(viewport);
-		camera.setPosition(0.0f, 0.0f);
+		camera = new OrthographicCamera();
+		viewport = new ExtendViewport(800 * Env.pixelsToMetres, 600 * Env.pixelsToMetres, 1280 * Env.pixelsToMetres, 720 * Env.pixelsToMetres, camera);
 		
-		uiViewportBuilder = new VirtualViewportBuilder(800, 600, 1280, 720);
-		uiViewport = uiViewportBuilder.getVirtualViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		uiCamera = new VirtualCamera(uiViewport);
-		uiCamera.setPosition(0.0f, 0.0f);
-		
-		oldCameraPos = new Vector3(camera.position);
+		uiCamera = new OrthographicCamera();
+		uiViewport = new ExtendViewport(800, 600, 1280, 720, uiCamera);
 		
 		tweenManager = new TweenManager();
 		Tween.registerAccessor(OrthographicCamera.class, new CameraTweener());
-		Tween.registerAccessor(VirtualCamera.class, new VirtualCameraTweener());
 		Tween.registerAccessor(Actor.class, new ActorTweener());
 		Tween.registerAccessor(TransformComponent.class, new TransformTweener());
 		Tween.setCombinedAttributesLimit(4);
@@ -127,8 +110,8 @@ public class SionGame extends Game implements InputProcessor {
 		currentTime = TimeUtils.millis() / 1000.0;
 		engine = new Engine();
 		
-		stage = new Stage(Env.virtualWidth, Env.virtualHeight, true);
-		stage.setCamera(uiCamera);
+		stage = new Stage();
+		stage.setViewport(uiViewport);
 		
 		multiplexer = new InputMultiplexer();
 		Gdx.input.setInputProcessor(multiplexer);
@@ -200,13 +183,6 @@ public class SionGame extends Game implements InputProcessor {
 			physics.interpolate(Env.physicsDeltaTime, (float)(accumulator / Env.physicsDeltaTime));
 		}
 		
-		Color background = Env.backgroundColor;
-		Gdx.gl.glClearColor(background.r, background.g, background.b, background.a);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-		Gdx.gl.glEnable(GL10.GL_BLEND);
-		
-		camera.update();
-		uiCamera.update();
 		engine.update(deltaTime);
 		stage.act(deltaTime);
 		
@@ -215,17 +191,6 @@ public class SionGame extends Game implements InputProcessor {
 
 	@Override
 	public void resize(int width, int height) {
-		oldCameraPos.set(camera.position);
-		viewport = viewportBuilder.getVirtualViewport(width * Env.pixelsToMetres, height * Env.pixelsToMetres);
-		camera.setVirtualViewport(viewport);
-		camera.position.set(oldCameraPos.x, oldCameraPos.y, 0.0f);
-		
-		uiViewport = uiViewportBuilder.getVirtualViewport(width, height);
-		uiCamera.setVirtualViewport(uiViewport);
-		uiCamera.setPosition(uiViewport.width * 0.5f, uiViewport.height * 0.5f);
-		stage.setCamera(uiCamera);
-		
-		
 		if (currentScreen != null) {
 			currentScreen.resize(width, height);
 		}
@@ -273,28 +238,20 @@ public class SionGame extends Game implements InputProcessor {
 		return assets;
 	}
 	
-	public VirtualCamera getCamera() {
+	public OrthographicCamera getCamera() {
 		return camera;
 	}
 	
-	public VirtualViewport getViewport() {
+	public Viewport getViewport() {
 		return viewport;
 	}
 	
-	public VirtualViewportBuilder getViewportBuilder() {
-		return viewportBuilder;
-	}
-	
-	public VirtualCamera getUICamera() {
+	public OrthographicCamera getUICamera() {
 		return uiCamera;
 	}
 	
-	public VirtualViewport getUIViewport() {
+	public Viewport getUIViewport() {
 		return uiViewport;
-	}
-	
-	public VirtualViewportBuilder getUIViewportBuilder() {
-		return uiViewportBuilder;
 	}
 	
 	public World getWorld() {

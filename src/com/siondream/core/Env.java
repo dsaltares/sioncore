@@ -43,7 +43,6 @@ public class Env {
 	public static boolean drawStage;
 	public static boolean drawGrid;
 	public static boolean drawFPS;
-	public static boolean drawViewportBuilder;
 	
 	private static String TAG = "Globals";
 	private static Settings settings;
@@ -88,6 +87,5 @@ public class Env {
 		drawStage = settings.getBoolean("drawStage", false);
 		drawGrid = settings.getBoolean("drawGrid", true);
 		drawFPS = settings.getBoolean("drawFPS", true);
-		drawViewportBuilder = settings.getBoolean("drawViewportBuilder", true);
 	}
 }

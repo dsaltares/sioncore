@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -19,10 +19,10 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import com.siondream.core.Env;
 import com.siondream.core.entity.components.ColorComponent;
@@ -31,9 +31,6 @@ import com.siondream.core.entity.components.ParticleComponent;
 import com.siondream.core.entity.components.SpineComponent;
 import com.siondream.core.entity.components.TextureComponent;
 import com.siondream.core.entity.components.TransformComponent;
-import com.siondream.core.virtualviewport.VirtualCamera;
-import com.siondream.core.virtualviewport.VirtualViewport;
-import com.siondream.core.virtualviewport.VirtualViewportBuilder;
 
 import ashley.core.Engine;
 import ashley.core.Entity;
@@ -46,8 +43,9 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 
 	protected SpriteBatch batch;
 	protected OrthographicCamera camera;
+	protected Viewport viewport;
 	protected OrthographicCamera uiCamera;
-	protected VirtualViewport uiViewport;
+	protected Viewport uiViewport;
 	protected ShapeRenderer shapeRenderer;
 	protected IntMap<Entity> mapEntities;
 	
@@ -65,12 +63,16 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 	
 	private BitmapFont debugFont;
 	
+	private int previousWidth;
+	private int previousHeight;
+	
 	public RenderingSystem() {
 		super();
 		
 		this.sortedEntities = new Array<Entity>(100);
 		this.batch = new SpriteBatch();
 		this.camera = Env.game.getCamera();
+		this.viewport = Env.game.getViewport();
 		this.uiCamera = Env.game.getUICamera();
 		this.uiViewport = Env.game.getUIViewport();
 		this.sorter = new DepthSorter();
@@ -92,7 +94,7 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 			debugFont = Env.game.getAssets().get("data/ui/default.fnt", BitmapFont.class);
 		}
 	}
-	
+
 	@Override
 	public void addedToEngine(Engine engine) {
 		super.addedToEngine(engine);
@@ -104,6 +106,13 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 
 	@Override
 	public void update(float deltaTime) {
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
+		int width = Gdx.graphics.getWidth();
+		int height = Gdx.graphics.getHeight();
+		
+		viewport.update(width, height);
+		
 		renderMap();
 		
 		batch.begin();
@@ -112,9 +121,21 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		
 		renderParticles();
 		
+		uiViewport.update(width, height);
+		uiCamera.position.set(uiViewport.getWorldWidth() * 0.5f, uiViewport.getWorldHeight() * 0.5f, 0.0f);
 		Env.game.getStage().draw();
 		
-		debugDraw();
+		viewport.update(width, height);
+		debugDrawWorld();
+		
+		uiViewport.update(width, height);
+		debugDrawUI();
+		
+		if (previousWidth != width || previousHeight != height) {
+			Env.game.resize(width, height);
+			previousWidth = width;
+			previousHeight = height;
+		}
 	}
 	
 	@Override
@@ -213,18 +234,12 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 	}
 	
 	protected void renderUI() {
-		Stage stage = Env.game.getStage();
-		stage.setCamera(uiCamera);
-		stage.draw();
+		Env.game.getStage().draw();
 	}
 	
 	protected void renderParticles() {
 		particleFrameBuffer.begin();
 		batch.begin();
-		
-		Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-		Gdx.gl.glEnable(GL10.GL_BLEND);
 		
 		Color initialColor = batch.getColor();
 		
@@ -252,8 +267,9 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 		batch.end();
 	}
 	
-	protected void debugDraw() {
+	protected void debugDrawWorld() {
 		if (Env.debug) {
+			
 			shapeRenderer.setProjectionMatrix(camera.combined);
 			
 			if (Env.drawGrid) {
@@ -289,36 +305,19 @@ public class RenderingSystem extends EntitySystem implements Disposable {
 			box2DRenderer.setDrawJoints(Env.drawJoints);
 			box2DRenderer.setDrawVelocities(Env.drawVelocities);
 			box2DRenderer.render(Env.game.getWorld(), camera.combined);
-			
+		}
+	}
+	
+	protected void debugDrawUI() {
+		if (Env.debug) {
 			if (Env.drawFPS) {
 				String fpsText = String.format("%d FPS", Gdx.graphics.getFramesPerSecond());
 				TextBounds bounds = debugFont.getBounds(fpsText);
 				batch.setProjectionMatrix(uiCamera.combined);
 				batch.begin();
 				debugFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-				debugFont.draw(batch, fpsText, uiViewport.width - bounds.width - 20.0f, 20.0f);
+				debugFont.draw(batch, fpsText, uiViewport.getWorldWidth() - bounds.width - 20.0f, 20.0f);
 				batch.end();
-			}
-			
-			if (Env.drawViewportBuilder) {
-				VirtualViewportBuilder viewportBuilder = Env.game.getViewportBuilder();
-				
-				shapeRenderer.setProjectionMatrix(camera.combined);
-				shapeRenderer.begin(ShapeType.Line);
-				
-				shapeRenderer.setColor(Color.GREEN);
-				shapeRenderer.rect(camera.position.x - viewportBuilder.minWidth * 0.5f,
-								   camera.position.y - viewportBuilder.minHeight * 0.5f,
-								   viewportBuilder.minWidth,
-								   viewportBuilder.minHeight);
-				
-				shapeRenderer.setColor(Color.YELLOW);
-				shapeRenderer.rect(camera.position.x - viewportBuilder.maxWidth * 0.5f,
-								   camera.position.y - viewportBuilder.maxHeight * 0.5f,
-								   viewportBuilder.maxWidth,
-								   viewportBuilder.maxHeight);
-				
-				shapeRenderer.end();
 			}
 			
 			Table.drawDebug(Env.game.getStage());
