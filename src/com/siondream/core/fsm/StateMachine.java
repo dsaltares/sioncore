@@ -1,5 +1,7 @@
 package com.siondream.core.fsm;
 
+import ashley.core.Entity;
+
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.core.Env;
@@ -11,11 +13,13 @@ public class StateMachine {
 	private State initialState;
 	private State currentState;
 	private State nextState;
+	private Entity entity;
 	
-	public StateMachine(String name) {
+	public StateMachine(String name, Entity entity) {
 		logger = new Logger(name, Env.debugLevel);
 		logger.info("initialising");
 		states = new ObjectMap<Class<? extends State>, State>();
+		this.entity = entity;
 	}
 	
 	public void addState(State state) {
@@ -55,5 +59,9 @@ public class StateMachine {
 	
 	public void setNextState(Class<? extends State> stateClass) {
 		nextState = states.get(stateClass);
+	}
+	
+	public Entity getEntity() {
+		return entity;
 	}
 }

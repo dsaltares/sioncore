@@ -2,14 +2,14 @@ package com.siondream.core.fsm;
 
 public abstract class State {
 	
-	private StateMachine stateMachine;
+	protected StateMachine fsm;
 	
 	public State(StateMachine stateMachine) {
-		this.stateMachine = stateMachine;
+		this.fsm = stateMachine;
 	}
 	
-	public StateMachine getStateMachine() {
-		return stateMachine;
+	public StateMachine getFSM() {
+		return fsm;
 	}
 	
 	public abstract void enter();
