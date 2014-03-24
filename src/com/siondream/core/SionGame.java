@@ -171,16 +171,17 @@ public class SionGame extends Game implements InputProcessor {
 		PhysicsSystem physics = engine.getSystem(PhysicsSystem.class);
 		
 		while (accumulator >= Env.physicsDeltaTime) {
+			
+			if (physics != null) {
+				physics.update(Env.physicsDeltaTime);
+			}
+			
 			world.step(Env.physicsDeltaTime, Env.velocityIterations, Env.positionIterations);
 			accumulator -= Env.physicsDeltaTime;
 			
 			if (physics != null) {
-				physics.update(deltaTime);
+				physics.interpolate(Env.physicsDeltaTime, (float)(accumulator / Env.physicsDeltaTime));
 			}
-		}
-		
-		if (physics != null) {
-			physics.interpolate(Env.physicsDeltaTime, (float)(accumulator / Env.physicsDeltaTime));
 		}
 		
 		engine.update(deltaTime);
