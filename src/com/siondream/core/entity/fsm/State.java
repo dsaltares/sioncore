@@ -1,4 +1,4 @@
-package com.siondream.core.fsm;
+package com.siondream.core.entity.fsm;
 
 public abstract class State {
 	

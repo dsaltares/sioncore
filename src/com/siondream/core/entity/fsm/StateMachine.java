@@ -1,4 +1,4 @@
-package com.siondream.core.fsm;
+package com.siondream.core.entity.fsm;
 
 import ashley.core.Entity;
 
