@@ -168,7 +168,7 @@ public class SpriteAnimationLoader extends AsynchronousAssetLoader<SpriteAnimati
 			
 			for (int i = 0; i < numFrames; ++i) {
 				int frame = Integer.parseInt(framesArray[i]);
-				int x = ((frame % animationData.columns) % animationData.rows) * width;
+				int x = (frame % animationData.columns)  * width;
 				int y = (frame / animationData.columns) * height;
 				
 				regions.add(new TextureRegion(texture, x, y, width, height));
