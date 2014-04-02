@@ -161,7 +161,7 @@ public class SpriteAnimationLoader extends AsynchronousAssetLoader<SpriteAnimati
 		Array<TextureRegion> regions = new Array<TextureRegion>();
 		
 		if (frames != null) {
-			String[] framesArray = frames.split(",");
+			String[] framesArray = frames.replaceAll(" ", "").split(",");
 			int numFrames = framesArray.length;
 			int width = texture.getWidth() / animationData.columns;
 			int height = texture.getHeight() / animationData.rows;
