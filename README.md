@@ -20,7 +20,7 @@ Most modules are either fairly well documented or self-explanatory.
 SionCore uses and exposes:
 
 * Libgdx
-* Ashley
+* [Ashley](https://github.com/stbachmann/ashley)
 * Spine
 * Universal Tween Engine
 * JavaCSV
